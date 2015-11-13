@@ -1,0 +1,270 @@
+@mixin responsive__desde($valor-width){
+	@media screen and (max-width: #{$valor-width}) {
+    	@content;
+  	}
+}
+@mixin responsive__lg(){
+	@media screen and (max-width: 1024px) {
+    	@content;
+  	}
+}
+@mixin responsive__md(){
+	@media screen and (max-width: 720px) {
+    	@content;
+  	}
+}
+@mixin responsive__sm(){
+	@media screen and (max-width: 480px) {
+    	@content;
+  	}
+}
+@mixin responsive__xs(){
+	@media screen and (max-width: 320px) {
+    	@content;
+  	}
+}
+
+
+@mixin col__ancho($ancho){
+		display:inline-block;
+		vertical-align: top;
+		width: $ancho
+}
+%bloque__inline-block{
+		vertical-align: top;
+		display:inline-block;
+}
+
+%bloque__inline-blockMid{
+		vertical-align: middle;
+		display:inline-block;
+}
+
+%margin__left{
+	margin-left:0;
+}
+
+// *********************  BOLQUES  RESPONSIVE DINAMICOS  *********************///
+
+@mixin bloques__dinamicos-top(
+	$list,
+	$count,
+	$res:null,
+	$top:null){
+
+	$acumulador:0;
+  @for $i from 1 through length($list) {
+	  	@if $i < $count+1{
+	  		$acumulador : nth($list, $i)+$acumulador;
+	   			}
+			@if $count != 1{
+				&>.block:nth-child(#{$i}){
+    					width: nth($list,$i);
+				}	
+			}
+		 }
+
+		@if $count == 1{
+				&>.block:nth-child(n){
+    					width: 100%;
+				}
+			}
+
+		@if $res != null {
+			&>.block:not(:nth-child(#{$res}n+1)){
+				margin-left:0;
+				}
+		}
+
+	 	@if $count > 1{
+	  	$result:  (100% -$acumulador) / ($count - 1);
+		 &>.block:not(:nth-child(#{$count}n+1)){
+				margin-left:$result;
+				}
+
+			}
+
+		@if $acumulador > $count{
+			$countTop : $count+1;
+			&>.block:nth-child(n+#{$countTop}){
+				margin-top:$top;
+				}
+		}
+
+
+		&>.block{
+			@extend %bloque__inline-block;
+		}
+}
+
+// *********************  BOLQUES RESPONSIVE FIJOS *********************///
+
+@mixin bloques__espaciados-top(
+	$ancho,
+	$count,
+	$res: null,
+	$top:null){
+	$multi : $ancho*$count;
+	
+	@if $multi <  101{
+		@if $res != null {
+			&__block:not(:nth-child(#{$res}n+1)){
+				margin-left:0;
+				}
+		}
+
+		@if $top != null {
+			$countTop :$count+1;
+			&__block:nth-child(n+#{$countTop}){
+				margin-top:$top;
+				}
+		}
+
+		@if $count > 1{
+		$result : (100 - $multi) / ($count - 1);
+		&__block:not(:nth-child(#{$count}n+1)){
+				margin-left:$result;
+				}
+			}
+		@else{
+			$result:0;
+		}	
+		&__block{
+			width: $ancho;
+			@content;
+			@extend %bloque__inline-block;
+		}
+
+	}
+}
+
+
+@mixin bloques__espaciados-mid(
+	$ancho,
+	$count,
+	$res:null,
+	$top: null){
+	$multi : $ancho*$count;
+	
+	@if $multi < 101{
+		@if $res != null {
+			&>.block:not(:nth-child(#{$res}n+1)){
+				margin-left:0;
+				}
+		}
+
+		@if $top != null {
+			$countTop :$count+1;
+			&>.block:nth-child(n+#{$countTop}){
+				margin-top:$top;
+				}
+		}
+
+		@if $count > 1{
+		$result : (100 - $multi) / ($count - 1);
+		&>.block:not(:nth-child(#{$count}n+1)){
+				margin-left:$result;
+				}
+			}
+		@else{
+			$result:0;
+		}	
+		&>.block{
+			width: $ancho;
+			@content;
+			@extend %bloque__inline-blockMid;
+		}
+
+	}
+}
+
+
+@mixin bloque__flex($ancho,$pos){
+	&>.block:nth-child(#{$pos}){
+			width: $ancho;
+			@content;
+		}
+	&>.block{
+		@extend %bloque__inline-blockMid;
+	}	
+}
+
+
+// *********************  letras responsivas *********************///
+
+@mixin textResponsive($nameClass,$size){
+	#{$nameClass}{
+		font-size: $size;
+	}
+}
+
+
+// *****************  TRIANGULO ************************//
+
+
+@mixin size($width, $height: $width) {
+  width: $width;
+  height: $height;
+}
+
+// [Private] 
+// Position helper mixin
+// Article about it: http://hugogiraudel.com/2013/08/05/offsets-sass-mixin/
+// ---
+// @param [string] $position: position type
+// @param [list] $args: list of offsets and values
+// ---
+@mixin _position($position, $args) {
+  @each $o in top right bottom left {
+    $i: index($args, $o);
+    @if $i
+    and $i + 1 <= length($args)
+    and type-of( nth($args, $i + 1) ) == number {
+      #{$o}: nth($args, $i + 1);
+    }
+  }
+  position: $position;
+}
+
+// Absolute positioning helper mixin
+// Article about it: http://hugogiraudel.com/2013/08/05/offsets-sass-mixin/
+// ---
+// @param [list] $args: list of offsets and values
+// ---
+@mixin absolute($args) {
+  @include _position(absolute, $args);
+}
+
+// Arrow helper mixin
+// ---
+// @param [string] $direction: arrow direction
+// @param [list] $position: list of offsets and values
+// @param [color] $color (inherit): arrow color
+// @param [number] $size (1em): arrow size
+// ---
+@mixin triangle($direction, $position, $color: currentColor, $size: 1em) {
+  // Make sure the direction is valid
+  @if not index(top right bottom left, $direction) {
+    @warn "Direction must be one of top, right, bottom or left.";
+  }
+
+  @else {
+    @include absolute($position); // Position
+    @include size(0); // Size
+    content: '';
+    z-index: 2;
+
+    border-#{$direction}: $size * 1.5 solid $color;
+    $perpendicular-borders: $size solid transparent;
+    
+    @if $direction == top or $direction == bottom {
+      border-left:   $perpendicular-borders;
+      border-right:  $perpendicular-borders;
+    }
+
+    @else if $direction == right or $direction == left {
+      border-bottom: $perpendicular-borders;
+      border-top:    $perpendicular-borders;
+    }
+  }
+}
